@@ -149,6 +149,10 @@ services:
 
 For production deployment, see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md) for detailed instructions.
 
+### CapRover Deployment
+
+For easy deployment to CapRover servers, see [CAPROVER_DEPLOYMENT.md](CAPROVER_DEPLOYMENT.md) for step-by-step instructions.
+
 ## 🧪 Testing
 
 ```bash
@@ -164,6 +168,7 @@ curl http://localhost:8080/api-status
 
 - [Local Testing Guide](LOCAL_TESTING.md)
 - [Docker Deployment Guide](DOCKER_DEPLOYMENT.md)
+- [CapRover Deployment Guide](CAPROVER_DEPLOYMENT.md)
 - [Environment Setup](env_complete_example)
 
 ## 🤝 Contributing
