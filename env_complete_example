@@ -1,0 +1,47 @@
+# AI Daily Briefing Assistant - Complete Environment Configuration
+# Copy this content to a .env file and fill in your actual values
+
+# ===== REQUIRED: OpenRouter API Configuration =====
+# Get your API key from https://openrouter.ai/
+OPENROUTER_API_KEY=your_openrouter_api_key_here
+
+# Choose your preferred AI model (default: anthropic/claude-3.5-sonnet)
+# Popular options:
+# - anthropic/claude-3.5-sonnet (recommended)
+# - openai/gpt-4o
+# - google/gemini-2.0-flash-exp
+# - meta-llama/llama-3.1-405b-instruct
+# - anthropic/claude-3-haiku (budget-friendly)
+OPENROUTER_MODEL=anthropic/claude-3.5-sonnet
+
+# ===== REQUIRED: Flask Configuration =====
+# Generate a secure random string for session encryption
+SECRET_KEY=your_super_secure_secret_key_here
+
+# ===== REQUIRED: Google OAuth Configuration =====
+# For local testing
+GOOGLE_REDIRECT_URI=http://localhost:5000/callback
+
+# ===== GOOGLE CREDENTIALS (Choose ONE method) =====
+
+# METHOD 1: Base64 encoded credentials (RECOMMENDED for Docker)
+# 1. Download credentials.json from Google Cloud Console
+# 2. Convert to base64: base64 -i credentials.json
+# 3. Paste the output here:
+GOOGLE_CREDENTIALS_BASE64=your_base64_encoded_credentials_here
+
+# METHOD 2: Individual OAuth fields (Alternative)
+# If you prefer to extract individual fields from credentials.json:
+# GOOGLE_CLIENT_ID=your_client_id.apps.googleusercontent.com
+# GOOGLE_CLIENT_SECRET=your_client_secret
+# GOOGLE_PROJECT_ID=your_project_id
+
+# ===== OPTIONAL: Environment Settings =====
+# Set to 'development' for local testing, 'production' for deployment
+FLASK_ENV=development
+
+# ===== OPTIONAL: Advanced Settings =====
+# Uncomment and modify if needed
+# FLASK_DEBUG=true
+# FLASK_HOST=0.0.0.0
+# FLASK_PORT=5000 

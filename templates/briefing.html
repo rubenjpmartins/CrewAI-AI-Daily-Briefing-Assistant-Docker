@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Daily Briefing</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+
+    .container {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    h1 {
+      color: #4a5568;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2.5em;
+    }
+
+    .status-panel {
+      background: #f7fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .status-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .status-indicator {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8em;
+      font-weight: bold;
+    }
+
+    .status-healthy { background: #c6f6d5; color: #22543d; }
+    .status-error { background: #fed7d7; color: #742a2a; }
+    .status-loading { background: #bee3f8; color: #2a4365; }
+
+    .button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 5px;
+      transition: transform 0.2s;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+    }
+
+    .button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    #loading {
+      text-align: center;
+      padding: 40px;
+      display: none;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    #briefing {
+      background: #f8f9fa;
+      border-left: 4px solid #667eea;
+      padding: 20px;
+      border-radius: 8px;
+      white-space: pre-wrap;
+      font-family: 'Georgia', serif;
+      line-height: 1.6;
+      display: none;
+    }
+
+    #error {
+      background: #fed7d7;
+      border-left: 4px solid #e53e3e;
+      padding: 20px;
+      border-radius: 8px;
+      color: #742a2a;
+      display: none;
+    }
+
+    .logs-container {
+      background: #1a202c;
+      color: #e2e8f0;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      display: none;
+    }
+
+    .log-line {
+      margin-bottom: 2px;
+      word-wrap: break-word;
+    }
+
+    .tabs {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.3s;
+    }
+
+    .tab.active {
+      border-bottom-color: #667eea;
+      color: #667eea;
+      font-weight: bold;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🤖 AI Daily Briefing Assistant</h1>
+    
+    <div class="status-panel">
+      <h3>System Status</h3>
+      <div class="status-item">
+        <span>OpenRouter API:</span>
+        <span id="api-status" class="status-indicator status-loading">Checking...</span>
+      </div>
+      <div class="status-item">
+        <span>Processing Status:</span>
+        <span id="processing-status" class="status-indicator status-healthy">Ready</span>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('briefing-tab')">📋 Briefing</div>
+      <div class="tab" onclick="showTab('logs-tab')">📝 Logs</div>
+      <div class="tab" onclick="showTab('debug-tab')">🔧 Debug</div>
+    </div>
+
+    <div id="briefing-tab" class="tab-content active">
+      <button class="button" onclick="generateBriefing()" id="generateBtn">
+        📧 Generate My Daily Briefing
+      </button>
+      <button class="button" onclick="checkApiStatus()">
+        🔍 Check API Status
+      </button>
+      
+      <div id="loading">
+        <div class="spinner"></div>
+        <p>Reading your emails and calendar...</p>
+        <p><small>This may take 30-60 seconds</small></p>
+      </div>
+      
+      <div id="briefing"></div>
+      <div id="error"></div>
+    </div>
+
+    <div id="logs-tab" class="tab-content">
+      <button class="button" onclick="toggleLogs()">
+        📊 Toggle Real-time Logs
+      </button>
+      <div id="logs" class="logs-container"></div>
+    </div>
+
+    <div id="debug-tab" class="tab-content">
+      <h3>Debug Information</h3>
+      <button class="button" onclick="testApi()">Test OpenRouter API</button>
+      <button class="button" onclick="clearLogs()">Clear Logs</button>
+      <div id="debug-info" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 10px;"></div>
+    </div>
+  </div>
+
+  <script>
+    let logsVisible = false;
+    let eventSource = null;
+
+    function showTab(tabId) {
+      // Hide all tab contents
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      
+      // Remove active class from all tabs
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Show selected tab content
+      document.getElementById(tabId).classList.add('active');
+      
+      // Add active class to clicked tab
+      event.target.classList.add('active');
+    }
+
+    function generateBriefing() {
+      const generateBtn = document.getElementById('generateBtn');
+      const loading = document.getElementById('loading');
+      const briefing = document.getElementById('briefing');
+      const error = document.getElementById('error');
+      const processingStatus = document.getElementById('processing-status');
+      
+      generateBtn.disabled = true;
+      loading.style.display = 'block';
+      briefing.style.display = 'none';
+      error.style.display = 'none';
+      
+      processingStatus.textContent = 'Processing...';
+      processingStatus.className = 'status-indicator status-loading';
+      
+      fetch('/briefing')
+        .then(response => response.json())
+        .then(data => {
+          loading.style.display = 'none';
+          generateBtn.disabled = false;
+          
+          if (data.error) {
+            error.textContent = data.error;
+            error.style.display = 'block';
+            processingStatus.textContent = 'Error';
+            processingStatus.className = 'status-indicator status-error';
+          } else {
+            briefing.textContent = data.briefing;
+            briefing.style.display = 'block';
+            processingStatus.textContent = `Completed (${data.processing_time || 'N/A'})`;
+            processingStatus.className = 'status-indicator status-healthy';
+          }
+        })
+        .catch(err => {
+          loading.style.display = 'none';
+          generateBtn.disabled = false;
+          error.textContent = 'Network error: ' + err.message;
+          error.style.display = 'block';
+          processingStatus.textContent = 'Network Error';
+          processingStatus.className = 'status-indicator status-error';
+        });
+    }
+
+    function checkApiStatus() {
+      const apiStatus = document.getElementById('api-status');
+      apiStatus.textContent = 'Checking...';
+      apiStatus.className = 'status-indicator status-loading';
+      
+      fetch('/api-status')
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'healthy') {
+            apiStatus.textContent = `✅ ${data.response_time}`;
+            apiStatus.className = 'status-indicator status-healthy';
+            apiStatus.title = `Model: ${data.model}, Response: ${data.test_response}`;
+          } else {
+            apiStatus.textContent = '❌ Error';
+            apiStatus.className = 'status-indicator status-error';
+            apiStatus.title = data.error;
+          }
+        })
+        .catch(err => {
+          apiStatus.textContent = '❌ Failed';
+          apiStatus.className = 'status-indicator status-error';
+          apiStatus.title = err.message;
+        });
+    }
+
+    function toggleLogs() {
+      const logsContainer = document.getElementById('logs');
+      
+      if (!logsVisible) {
+        logsContainer.style.display = 'block';
+        startLogStream();
+        logsVisible = true;
+      } else {
+        logsContainer.style.display = 'none';
+        stopLogStream();
+        logsVisible = false;
+      }
+    }
+
+    function startLogStream() {
+      if (eventSource) {
+        eventSource.close();
+      }
+      
+      eventSource = new EventSource('/logs');
+      const logsContainer = document.getElementById('logs');
+      
+      eventSource.onmessage = function(event) {
+        const logLine = document.createElement('div');
+        logLine.className = 'log-line';
+        logLine.textContent = event.data;
+        logsContainer.appendChild(logLine);
+        logsContainer.scrollTop = logsContainer.scrollHeight;
+        
+        // Keep only last 100 lines
+        while (logsContainer.children.length > 100) {
+          logsContainer.removeChild(logsContainer.firstChild);
+        }
+      };
+    }
+
+    function stopLogStream() {
+      if (eventSource) {
+        eventSource.close();
+        eventSource = null;
+      }
+    }
+
+    function testApi() {
+      const debugInfo = document.getElementById('debug-info');
+      debugInfo.innerHTML = '<p>Testing API...</p>';
+      
+      fetch('/api-status')
+        .then(response => response.json())
+        .then(data => {
+          debugInfo.innerHTML = `
+            <h4>API Test Results:</h4>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          `;
+        })
+        .catch(err => {
+          debugInfo.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
+        });
+    }
+
+    function clearLogs() {
+      document.getElementById('logs').innerHTML = '';
+    }
+
+    // Check API status on page load
+    window.onload = function() {
+      checkApiStatus();
+    };
+
+    // Cleanup on page unload
+    window.onbeforeunload = function() {
+      stopLogStream();
+    };
+  </script>
+</body>
+</html>

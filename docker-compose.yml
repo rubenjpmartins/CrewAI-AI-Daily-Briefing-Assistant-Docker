@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  ai-briefing:
+    build: .
+    ports:
+      - "8080:5000"
+    env_file:
+      - .env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "healthcheck.py"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      # Optional: Mount logs directory for persistent logging
+      - ./logs:/app/logs
+    environment:
+      - FLASK_ENV=production
+    networks:
+      - ai-briefing-network
+
+networks:
+  ai-briefing-network:
+    driver: bridge 
